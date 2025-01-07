@@ -1,108 +1,139 @@
-import random
-
 import numpy as np
 
-BOARD_SIZE = 3
 
-board = np.arange(1, BOARD_SIZE**2 + 1).astype(str)
+def initialize_board() -> tuple[int, np.ndarray, dict[int, str]]:
+    """
+    Initialize the game board.
 
-victories = np.array(
-    [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
+    Returns:
+        board_size: The size of the game board (e.g., 3 for a 3x3 board).
+        board: The initial game board state.
+        symbol_mapping: Numeric-symbol pairs.
+    """
+    board_size = 3
+    board = np.arange(1, board_size**2 + 1)
+    symbol_mapping = {0: "O", -1: "X"}
+
+    return board_size, board, symbol_mapping
+
+
+def setup_victory_rules() -> list[list[int]]:
+    """
+    Define the win conditions for the game.
+
+    Return:
+        victory_rules: Possible win conditions.
+    """
+    victory_rules = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
         [1, 4, 7],
         [2, 5, 8],
-        [3, 6, 9],
-        [1, 5, 9],
-        [3, 5, 7],
+        [0, 4, 8],
+        [2, 4, 6],
     ]
-)
-
-moves = [num for num in range(1, (BOARD_SIZE**2) + 1)]
-random.shuffle(moves)
+    return victory_rules
 
 
-def display_board(BOARD_SIZE: int, board: np.ndarray) -> None:
+def randomize_moves(board: np.ndarray) -> np.ndarray:
+    """
+    Generate a randomized sequence of moves.
+
+    Arg:
+        board: The current game board state.
+
+    Return:
+        moves: Shuffled board positions.
+    """
+    moves = np.random.permutation(board)
+    return moves
+
+
+def display_board(
+    board_size: int, board: np.ndarray, symbol_mapping: dict[int, str]
+) -> None:
     """
     Display the current state of the game board.
 
     Args:
-        BOARD_SIZE: The size of the game board (e.g., 3 for a 3x3 board).
+        board_size: The size of the game board (e.g., 3 for a 3x3 board).
         board: The current game board state.
+        symbol_mapping: Numeric-symbol pairs.
     """
+
     print()
     for i, num in enumerate(board):
-        print(num, end="  ")
-        if (i + 1) % BOARD_SIZE == 0:
+        if board[i] == 0:
+            print(symbol_mapping[0], end="  ")
+        elif board[i] == -1:
+            print(symbol_mapping[-1], end="  ")
+        else:
+            print(num, end="  ")
+        if (i + 1) % board_size == 0:
             print()
     print()
 
 
 def apply_move(
     player: str,
-    symbol: str,
+    symbol_mapping: dict[int, str],
+    symbol_value: int,
     move: int,
     board: np.ndarray,
 ) -> None:
     """
-    Update the game board with the player's move.
+    Apply the player's move to the game board.
 
     Args:
         player: The current player's name.
-        symbol: The player's symbol (e.g., "O" or "X").
+        symbol_mapping: Numeric-symbol pairs.
+        symbol_value: Numeric value of the player's symbol.
         move: The position chosen by the player.
         board: The current game board state.
     """
-    print(f"{player}({symbol})가 선택한 수 : {move}")
-    board[(move - 1)] = symbol
+    print(f"{player}({symbol_mapping[symbol_value]})가 선택한 수 : {move}")
+    board[(move - 1)] = symbol_value
 
 
-def check_for_victory(board: np.ndarray, victories: np.ndarray) -> bool:
+def check_for_victory(board: np.ndarray, victory_rules: list[list[int]]) -> bool:
     """
     Determine if any win condition is satisfied.
 
     Args:
         board: The current game board state.
-        victories: Possible win conditions.
+        victory_rules: Possible win conditions.
     Return:
         True if a condition is satisfied, otherwise False.
     """
-    for victory in victories:
-        if np.all(board[victory - 1] == board[victory - 1][0]):
+    for victory in victory_rules:
+        if np.all(board[victory] == board[victory][0]):
             return True
     return False
 
 
-def play_game(
-    BOARD_SIZE: int,
-    moves: list[int],
-    board: np.ndarray,
-    victories: np.ndarray,
-) -> None:
-    """
-    Run a Tic Tac Toe game.
+def play_game() -> None:
+    """Run a Tic Tac Toe game."""
 
-    Args:
-        BOARD_SIZE: The size of the game board (e.g., 3 for a 3x3 board).
-        moves: Shuffled board positions.
-        board: The current game board state.
-        victories: Possible win conditions.
-    """
-    display_board(BOARD_SIZE, board)
+    board_size, board, symbol_mapping = initialize_board()
+    victory_rules = setup_victory_rules()
+    moves = randomize_moves(board)
+
+    display_board(board_size, board, symbol_mapping)
+
     for idx, move in enumerate(moves):
         if idx % 2 == 0:
             player_name = "첫 번째 플레이어"
-            symbol = "O"
-            apply_move(player_name, symbol, move, board)
+            symbol_value = 0
         else:
             player_name = "두 번째 플레이어"
-            symbol = "X"
-            apply_move(player_name, symbol, move, board)
+            symbol_value = -1
 
-        display_board(BOARD_SIZE, board)
+        apply_move(player_name, symbol_mapping, symbol_value, move, board)
+        display_board(board_size, board, symbol_mapping)
 
-        if check_for_victory(board, victories):
+        if check_for_victory(board, victory_rules):
             print(f"{player_name} 승리!")
             break
     else:
@@ -110,4 +141,4 @@ def play_game(
 
 
 if __name__ == "__main__":
-    play_game(BOARD_SIZE, moves, board, victories)
+    play_game()
