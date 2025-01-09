@@ -113,13 +113,43 @@ def check_for_victory(board: np.ndarray, victory_rules: list[list[int]]) -> bool
     return False
 
 
-def play_game() -> None:
-    """Run a Tic Tac Toe game."""
+def prompt_restart() -> bool:
+    """
+    Prompt the user to restart game.
 
-    board_size, board, symbol_mapping = initialize_board()
-    victory_rules = setup_victory_rules()
-    moves = randomize_moves(board)
+    Return:
+        bool: True for restart, otherwise False.
+    """
 
+    while True:
+        restart = (
+            input("게임을 다시 시작하려면 'y', 종료하려면 'n'을 입력하세요. : ")
+            .strip()
+            .lower()
+        )
+        if restart in ["y", "n"]:
+            return restart == "y"
+        else:
+            print("잘못 입력하셨습니다. 다시 입력해 주세요.")
+
+
+def play_one_round(
+    board_size: int,
+    board: np.ndarray,
+    symbol_mapping: dict[int, str],
+    moves: np.ndarray,
+    victory_rules: list[list[int]],
+) -> None:
+    """
+    Play a single round of the Tic Tac Toe game.
+
+    Args:
+        board_size: The size of the game board (e.g., 3 for a 3x3 board).
+        board: The current game board state.
+        symbol_mapping: Numeric-symbol pairs.
+        moves: Shuffled board positions.
+        victory_rules: Possible win conditions.
+    """
     display_board(board_size, board, symbol_mapping)
 
     for idx, move in enumerate(moves):
@@ -140,5 +170,22 @@ def play_game() -> None:
         print("비겼습니다.")
 
 
+def main() -> None:
+    """Execute the Tic Tac Toe game."""
+    victory_rules = setup_victory_rules()
+
+    while True:
+        board_size, board, symbol_mapping = initialize_board()
+        moves = randomize_moves(board)
+
+        play_one_round(board_size, board, symbol_mapping, moves, victory_rules)
+
+        if prompt_restart():
+            print("게임을 재시작합니다.")
+        else:
+            print("게임을 종료합니다.")
+            break
+
+
 if __name__ == "__main__":
-    play_game()
+    main()
