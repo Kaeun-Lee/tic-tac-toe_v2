@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 
@@ -37,7 +39,7 @@ def setup_victory_rules() -> list[list[int]]:
     return victory_rules
 
 
-def randomize_moves(board: np.ndarray) -> np.ndarray:
+def randomize_moves(board: np.ndarray) -> list[int]:
     """
     Generate a randomized sequence of moves.
 
@@ -47,7 +49,7 @@ def randomize_moves(board: np.ndarray) -> np.ndarray:
     Return:
         moves: Shuffled board positions.
     """
-    moves = np.random.permutation(board)
+    moves = list(np.random.permutation(board))
     return moves
 
 
@@ -74,6 +76,44 @@ def display_board(
         if (i + 1) % board_size == 0:
             print()
     print()
+
+
+def get_player_move(moves: list[int]) -> int:
+    """
+    Prompt the player to input a valid move.
+
+    Arg:
+        moves: Shuffled board positions.
+
+    Return:
+        move: The position chosen by the human player.
+    """
+    while True:
+        try:
+            move = int(input("수를 입력하세요. : "))
+        except ValueError as e:
+            print(f"정수를 입력하세요.")
+        else:
+            if move < 1 or move > 9:
+                print("1 ~ 9 사이의 수를 입력하세요.")
+            if move in moves:
+                return move
+            else:
+                print("이미 놓인 수입니다. 다시 선택해 주세요.")
+
+
+def choose_random_move(moves: list[int]) -> int:
+    """
+    Select a random move from the available moves.
+
+    Arg:
+        moves: Shuffled board positions.
+
+    Return:
+        move: The position randomly chosen by the computer.
+    """
+    move = random.choice(moves)
+    return move
 
 
 def apply_move(
@@ -104,6 +144,7 @@ def check_for_victory(board: np.ndarray, victory_rules: list[list[int]]) -> bool
     Args:
         board: The current game board state.
         victory_rules: Possible win conditions.
+
     Return:
         True if a condition is satisfied, otherwise False.
     """
@@ -137,7 +178,7 @@ def play_one_round(
     board_size: int,
     board: np.ndarray,
     symbol_mapping: dict[int, str],
-    moves: np.ndarray,
+    moves: list[int],
     victory_rules: list[list[int]],
 ) -> None:
     """
@@ -152,14 +193,17 @@ def play_one_round(
     """
     display_board(board_size, board, symbol_mapping)
 
-    for idx, move in enumerate(moves):
-        if idx % 2 == 0:
-            player_name = "첫 번째 플레이어"
-            symbol_value = 0
-        else:
-            player_name = "두 번째 플레이어"
+    while moves:
+        if len(moves) % 2 == 0:
+            player_name = "Computer"
             symbol_value = -1
+            move = choose_random_move(moves)
+        else:
+            player_name = "Player"
+            symbol_value = 0
+            move = get_player_move(moves)
 
+        moves.remove(move)
         apply_move(player_name, symbol_mapping, symbol_value, move, board)
         display_board(board_size, board, symbol_mapping)
 
