@@ -15,7 +15,6 @@ def initialize_board() -> tuple[int, np.ndarray, dict[int, str]]:
     board_size = 3
     board = np.arange(1, board_size**2 + 1)
     symbol_mapping = {0: "O", -1: "X"}
-
     return board_size, board, symbol_mapping
 
 
@@ -37,6 +36,18 @@ def setup_victory_rules() -> list[list[int]]:
         [2, 4, 6],
     ]
     return victory_rules
+
+
+def setup_players() -> list[str]:
+    """
+    Sets up the players with a random order.
+
+    Return:
+        players: The player names in random order.
+    """
+    players = ["Computer", "Player"]
+    random.shuffle(players)
+    return players
 
 
 def display_board(
@@ -143,8 +154,9 @@ def play_one_round(
     board_size: int,
     board: np.ndarray,
     symbol_mapping: dict[int, str],
-    available_moves: list[int],
     victory_rules: list[list[int]],
+    available_moves: list[int],
+    players: list[str],
 ) -> None:
     """
     Play a single round of the Tic Tac Toe game.
@@ -153,19 +165,23 @@ def play_one_round(
         board_size: The size of the game board (e.g., 3 for a 3x3 board).
         board: The current game board state.
         symbol_mapping: Numeric-symbol pairs.
-        available_moves: Positions available for selection.
         victory_rules: Possible win conditions.
+        available_moves: Positions available for selection.
+        players: The player names in random order.
     """
     display_board(board_size, board, symbol_mapping)
 
     while available_moves:
-        if len(available_moves) % 2 == 0:
-            player_name = "Computer"
+        if len(available_moves) % 2:
+            player_name = players[0]
+            symbol_value = 0
+        else:
+            player_name = players[1]
             symbol_value = -1
+
+        if player_name == "Computer":
             move = choose_random_move(available_moves)
         else:
-            player_name = "Player"
-            symbol_value = 0
             move = get_player_move(available_moves)
 
         print(f"{player_name}({symbol_mapping[symbol_value]})가 선택한 수 : {move}")
@@ -185,16 +201,30 @@ def play_one_round(
 def main() -> None:
     """Execute the Tic Tac Toe game."""
     victory_rules = setup_victory_rules()
+    players = setup_players()
+    round = 1
 
     while True:
         board_size, board, symbol_mapping = initialize_board()
         available_moves = list(board)
 
+        if round > 1:
+            players.reverse()
+
+        print(f"Round {round}\n")
+        print(f"{players[0]}가 선입니다.")
+
         play_one_round(
-            board_size, board, symbol_mapping, available_moves, victory_rules
+            board_size,
+            board,
+            symbol_mapping,
+            victory_rules,
+            available_moves,
+            players,
         )
 
         if prompt_restart():
+            round += 1
             print("게임을 재시작합니다.")
         else:
             print("게임을 종료합니다.")
