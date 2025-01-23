@@ -38,15 +38,15 @@ def setup_victory_rules() -> list[list[int]]:
     return victory_rules
 
 
-def setup_players() -> list[str]:
+def setup_players() -> tuple[str, str]:
     """
     Sets up the players with a random order.
 
     Return:
         players: The player names in random order.
     """
-    players = ["Computer", "Player"]
-    random.shuffle(players)
+    players = ("Computer", "Player")
+    random.sample(players, 2)
     return players
 
 
@@ -156,7 +156,8 @@ def play_one_round(
     symbol_mapping: dict[int, str],
     victory_rules: list[list[int]],
     available_moves: list[int],
-    players: list[str],
+    first_player: str,
+    second_player: str,
 ) -> None:
     """
     Play a single round of the Tic Tac Toe game.
@@ -167,16 +168,17 @@ def play_one_round(
         symbol_mapping: Numeric-symbol pairs.
         victory_rules: Possible win conditions.
         available_moves: Positions available for selection.
-        players: The player names in random order.
+        first_player: The player who moves first.
+        second_player: The player who moves second.
     """
     display_board(board_size, board, symbol_mapping)
 
     while available_moves:
         if len(available_moves) % 2:
-            player_name = players[0]
+            player_name = first_player
             symbol_value = 0
         else:
-            player_name = players[1]
+            player_name = second_player
             symbol_value = -1
 
         if player_name == "Computer":
@@ -201,18 +203,15 @@ def play_one_round(
 def main() -> None:
     """Execute the Tic Tac Toe game."""
     victory_rules = setup_victory_rules()
-    players = setup_players()
+    first_player, second_player = setup_players()
     round = 1
 
     while True:
         board_size, board, symbol_mapping = initialize_board()
         available_moves = list(board)
 
-        if round > 1:
-            players.reverse()
-
         print(f"Round {round}\n")
-        print(f"{players[0]}가 선입니다.")
+        print(f"{first_player}가 선입니다.")
 
         play_one_round(
             board_size,
@@ -220,11 +219,13 @@ def main() -> None:
             symbol_mapping,
             victory_rules,
             available_moves,
-            players,
+            first_player,
+            second_player,
         )
 
         if prompt_restart():
             round += 1
+            first_player, second_player = second_player, first_player
             print("게임을 재시작합니다.")
         else:
             print("게임을 종료합니다.")
