@@ -75,6 +75,19 @@ def display_board(
     print()
 
 
+def display_scoreboard(scoreboard: dict[str, int]) -> None:
+    """
+    Display the current game scoreboard.
+
+    Arg:
+        scoreboard: The current scores.
+    """
+    print(f"    현재 스코어    ")
+    print(
+        f"< Player >  {scoreboard['Player']} : {scoreboard['Computer']}  < Computer >\n"
+    )
+
+
 def get_player_move(available_moves: list[int]) -> int:
     """
     Prompt the player to input a valid move.
@@ -158,6 +171,7 @@ def play_one_round(
     available_moves: list[int],
     first_player: str,
     second_player: str,
+    scoreboard: dict[str, int],
 ) -> None:
     """
     Play a single round of the Tic Tac Toe game.
@@ -170,6 +184,7 @@ def play_one_round(
         available_moves: Positions available for selection.
         first_player: The player who moves first.
         second_player: The player who moves second.
+        scoreboard: The current scores.
     """
     display_board(board_size, board, symbol_mapping)
 
@@ -194,6 +209,7 @@ def play_one_round(
         display_board(board_size, board, symbol_mapping)
 
         if check_for_victory(board, victory_rules):
+            scoreboard[player_name] += 1
             print(f"{player_name} 승리!")
             break
     else:
@@ -204,6 +220,7 @@ def main() -> None:
     """Execute the Tic Tac Toe game."""
     victory_rules = setup_victory_rules()
     first_player, second_player = setup_players()
+    scoreboard = {"Player": 0, "Computer": 0}
     round = 1
 
     while True:
@@ -211,6 +228,7 @@ def main() -> None:
         available_moves = list(board)
 
         print(f"Round {round}\n")
+        display_scoreboard(scoreboard)
         print(f"{first_player}가 선입니다.")
 
         play_one_round(
@@ -221,12 +239,13 @@ def main() -> None:
             available_moves,
             first_player,
             second_player,
+            scoreboard,
         )
 
         if prompt_restart():
             round += 1
             first_player, second_player = second_player, first_player
-            print("게임을 재시작합니다.")
+            print("게임을 재시작합니다.\n")
         else:
             print("게임을 종료합니다.")
             break
